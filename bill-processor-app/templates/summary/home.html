@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Summary for {{ g.user['username'] }}{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  <h2>Statements</h2>
+  <div>You have {{ session['statements']|length }} statements!</div>
+  <form id="form1" method="post" action="{{ url_for('summary.view_statement') }}"></form>
+  {% if g.user %}
+    <table>
+      {% if session['statements']|length > 0 %}
+        <tr><th>Desc</th><th>Month</th><th>Year</th><th></th><th>Debits</th><th>Credits</th><th>Total</th></tr>
+      {% endif %}
+      {% for s in session['statements'] %}
+      <tr>
+        <td>{{ s[0] }}</td>
+        <td>{{ s[1] }}</td>
+        <td>{{ s[2] }}</td>
+        <td><button name="statementID" type="submit" form="form1" value="{{ s[3] }}">View</button></td>
+        <td>{{ s[4] }}</td>
+        <td>{{ s[5] }}</td>
+        <td>{{ s[4] + s[5] }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    <a href="{{ url_for('summary.upload') }}">Upload statements</a>
+  {% else %}
+    <p>No data. User must be logged in</p>
+  {% endif %}
+{% endblock %}
