@@ -24,9 +24,17 @@ def close_db(e=None):
 
 def init_db():
     db = get_db()
+    load_file(db, 'schema.sql')
+    load_file(db, 'static_data/categories.sql')
+    load_file(db, 'static_data/types.sql')
+    load_file(db, 'static_data/mappings.sql')
 
-    with current_app.open_resource('schema.sql') as f:
-        db.executescript(f.read().decode('utf8'))
+def load_file(db, fname):
+    try:
+        with current_app.open_resource(fname) as f:
+            db.executescript(f.read().decode('utf8'))
+    except IOError:
+        print("Could not find sql script file: {}".format(fname))
 
 @click.command('init-db')
 @with_appcontext
