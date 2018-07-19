@@ -1,0 +1,4 @@
+include billProcessor/schema.sql
+graft billProcessor/static
+graft billProcessor/templates
+global-exclude *.pyc
