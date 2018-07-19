@@ -9,5 +9,4 @@ instance/
 .coverage
 htmlcov/
 
-dist/
 build/
