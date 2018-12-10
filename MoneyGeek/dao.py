@@ -1,7 +1,6 @@
 import sqlite3
 from sqlite3 import IntegrityError
 from datetime import datetime
-import rncryptor
 from werkzeug.security import check_password_hash, generate_password_hash
 
 class DataAccessor:
