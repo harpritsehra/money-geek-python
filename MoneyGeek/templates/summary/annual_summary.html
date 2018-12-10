@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <h1>{% block title %}Annual summary for {{ g.user['username'] }}: {{ year }}<br>
+    <label class="switch">
+      <input id="cumbox" type="checkbox" type="submit"
+      {% if cumulative == true %}checked="true"{% endif %}
+      >
+      <span class="slider round"></span>
+    </label>
+    {% if cumulative == true %}
+      (Cumulative on)
+    {% else %}
+      (Cumulative off)
+    {% endif %}
+  {% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  {% if g.user %}
+    <table>
+    {% for s in summary %}
+      <tr><td><div id="linechart_material_{{ categoryIDMap[s[0]] }}"></div></td></tr>
+      <tr><td>
+        <form action="{{ url_for('summary.update_budget') }}" id="update_budget_{{ s[0] }}" method="post"></form>
+        {{s[0]}} Budget: <input form="update_budget_{{ s[0] }}" type="text" name="{{ categoryIDMap[s[0]] }}" value="{{ s[14] }}">
+        <button id="{{ s[0] }}_button" type="submit" form="update_budget_{{ s[0] }}">Update</button>
+        <hr>
+      </td></tr>
+    {% endfor %}
+    </table>
+  {% else %}
+    <p>No data. User must be logged in</p>
+  {% endif %}
+{% endblock %}
+{% block script %}
+    $("#cumbox").click(function() {
+      window.location.href = "{{ url_for('summary.annual_summary') }}?cumulative=" 
+        + "{{ not cumulative }}".toLowerCase()
+	+ "&year=" + {{ year }};
+    });
+
+    google.charts.load('current', {'packages':['line']});
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+      //var data = new google.visualization.DataTable();
+      {% for h in headers %}
+        //data.addColumn('number', '{{ h }}');
+      {% endfor %}
+      {% for row in matrix %}
+        //data.addRows([[ {% for elem in row %} {{ elem }}, {% endfor %} ]]);
+      {% endfor %}
+
+      {% for s in summary %}
+        {% set id = categoryIDMap[s[0]] %}
+        {% set average = s[13] / 12 %}
+        {% set budget = s[14] %} 
+        {% set running_budget = namespace(val=s[14]) %}
+        var data_{{ id }} = new google.visualization.DataTable();
+        data_{{ id }}.addColumn('string', 'Month');
+        data_{{ id }}.addColumn('number', '{{ s[0] }}');
+        data_{{ id }}.addColumn('number', 'Amortised');
+        data_{{ id }}.addColumn('number', 'Monthly Budget');
+        data_{{ id }}.addRows([
+          {% for elem in s %}
+            {% if loop.index > 1 and loop.index < 14 %}
+              [ '{{ months[loop.index-2] }}', {{ elem }}, {{ average }}, {{ running_budget.val }} ],
+              {% if cumulative == true %}{% set running_budget.val = running_budget.val + budget %}{% endif %}
+            {% endif %}
+          {% endfor %}
+        ]);
+        var options_{{ id }} = {
+          title: '{{ s[0] }} (Total: {{ s[13] }})',
+          curveType: 'function',
+          width: 900,
+          height: 200,
+          legend: { position: 'bottom' }
+        };
+
+        var chart_{{ id }} = new google.charts.Line(document.getElementById('linechart_material_{{ id }}'));
+
+        chart_{{ id }}.draw(data_{{ id }}, google.charts.Line.convertOptions(options_{{ id }}));
+      {% endfor %}
+    }
+{% endblock %}

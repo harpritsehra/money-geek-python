@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Summary for {{ g.user['username'] }}{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  {% if g.user %}
+    <form id="summary" method="post" action="{{ url_for('summary.view_account') }}"></form>
+    <table>
+      {% if session['summary']|length > 0 %}
+        <tr class="head">
+          <th>institution</th>
+          <th>acctNo</th>
+          <th>account</th>
+          <th>type</th>
+          <th></th>
+        </tr>
+        {% for row in session['summary'] %}
+          <tr class="{{ loop.cycle('odd', 'even') }}">
+            <td>{{ row['institution'] }}</td>
+            <td>****{{ row['lastFourID'] }}</td>
+            <td>{{ row['account'] }}</td>
+            <td>{{ row['officialName'] }}</td>
+            <td><button name="accountID" type="submit" form="summary" value="{{ row['accountID'] }}">View</button></td>
+          </tr>
+        {% endfor %}
+      {% endif %}
+    </table>
+    <form id="monthly" action="{{ url_for('summary.monthly_summary') }}"></form>
+    <form id="annual" action="{{ url_for('summary.annual_summary') }}"></form>
+    <div>
+      <input form="monthly" type="submit" value="Monthly Summary" />
+      <input form="annual" type="submit" value="Annual Summary" />
+    </div>
+  {% else %}
+    <p>No data. User must be logged in</p>
+  {% endif %}
+{% endblock %}

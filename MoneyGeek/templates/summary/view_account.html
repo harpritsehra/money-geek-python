@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Summary for {{ g.user['username'] }}{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  <h2>View Account</h2>
+  {% if g.user %}
+    {% if info['dates']|length == 0 %}
+      <p>No transaction data for chosen account</p>
+    {% else %}
+      <h3>Selected date</h3>
+      <form action="{{ url_for('summary.view_account') }}" id="choose_date" method="post"></form>
+      <select form="choose_date" name="chosen_date">
+      {% for d in info['dates'] %}
+        <option value="{{ d['year']  }}-{{ d['month'] }}"
+        {% if d['year'] == info['year'] and d['month'] == info['month'] %}
+          selected
+        {% endif %}
+        >{{ d['year']  }}-{{ d['month'] }}</option>
+      {% endfor %}
+      </select>
+      <button id="changeDate" type="submit" form="choose_date">Change Date</button>   
+      <input type="hidden" form="choose_date" name="accountID" value="{{ info['accountID'] }}">
+
+      <datalist id="categories">
+      {% for c in categories %}
+        <option value="{{ c['name'] }}:{{ c['categoryID'] }}">
+      {% endfor %}
+      </datalist>
+      <form action="{{ url_for('summary.update_transactions') }}" id="update_txn" method="post"></form>
+      <input type="hidden" form="update_txn" name="accountID" value="{{ info['accountID'] }}">
+      <h3>Found {{ transactions|length }} transactions for account: {{ info['name'] }}</h3>
+      <table>
+        <tr><th>date</th><th>desc</th><th>amount</th><th>category</th></tr>
+      {% for t in transactions %}
+        <tr>
+          <td>{{ t['date'] }}</td>
+          <td style="word-wrap: normal;">{{ t['name'] }}</td>
+          <td>{{ t['amount'] }}</td>
+          <td>
+            {% if t['userCategory'] %}
+              {% set value = t['userCategory'] + ':' + t['categoryID']|string %}
+            {% else %}
+              {% set value = '' %}
+            {% endif %}
+            <input class="txn" list="categories" id="{{ t['transactionID'] }}" name="{{ value }}" value="{{ value }}" />
+          </td>
+        </tr>
+      {% endfor %}
+      </table>
+      <br/>
+      <button id="backButton" type="button" onclick="location.href='{{ url_for("summary.home") }}'">Back/Discard Changes</button>   
+      <button id="saveButton" type="submit" form="update_txn">Save changes</button>   
+      <br/>
+    {% endif %}
+  {% else %}
+    <p>No data. User must be logged in</p>
+  {% endif %}
+{% endblock %}
+{% block script %}
+  $(document).ready(function(){
+
+     $(".txn").blur(function(){
+       if ( this.name !== this.value ) {
+         $(this).css("background-color", "#cccccc")
+       }
+     });
+
+     $("#saveButton").click(function() {
+         $(".txn").each(function( idx ) {
+           if ( this.name !== this.value ) {
+             $('<input />').attr('type', 'hidden')
+               .attr('name', 'txn')
+               .attr('value', this.id + ':' + this.value)
+               .appendTo('#update_txn');
+           }
+         });
+     });
+
+  });
+{% endblock %}

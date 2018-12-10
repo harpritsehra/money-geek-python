@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <h1>{% block title %}Monthly summary for {{ g.user['username'] }}: {{ year }}-{{ month }}{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  {% if g.user %}
+    <div id="chart_div"></div>
+    <table>
+    <tr><th>category</th><th>total</th></tr>
+    {% for s in summary %}
+      <tr><td>{{ s['catName'] }}</td><td>{{ s['total'] }}</td></tr>
+    {% endfor %}
+    </table>
+  {% else %}
+    <p>No data. User must be logged in</p>
+  {% endif %}
+{% endblock %}
+{% block script %}
+      // Load the Visualization API and the corechart package.
+      google.charts.load('current', {'packages':['corechart']});
+
+      // Set a callback to run when the Google Visualization API is loaded.
+      google.charts.setOnLoadCallback(drawChart);
+
+      // Callback that creates and populates a data table,
+      // instantiates the pie chart, passes in the data and
+      // draws it.
+      function drawChart() {
+
+        // Create the data table.
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Category');
+        data.addColumn('number', 'Spent');
+        data.addColumn('number', 'Remaining');
+        data.addColumn('number', 'Over');
+        data.addRows([
+          {% for s in summary %}
+            {% if s['catName'] not in ['Income', 'Payments', 'Transfer', 'Savings', 'Rent'] %}
+              ['{{ s['catName'] }}', {{ [s['total'],s['budget']]|min }}, {{ [s['budget'] - [s['total'],0]|max, 0]|max }}, {{ [s['total'] - s['budget'], 0]|max }}],
+            {% endif %}
+          {% endfor %}
+        ]);
+
+        // Set chart options
+        var options = {title : 'Monthly Summary',
+                       width : 800,
+                       height : 600,
+                       isStacked : true,
+                       colors : ['green', 'gray', 'maroon']};
+
+        // Instantiate and draw our chart, passing in some options.
+        var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+        chart.draw(data, options);
+      }
+{% endblock %}
