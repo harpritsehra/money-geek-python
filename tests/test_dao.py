@@ -9,7 +9,6 @@ class TestDataAccessor(unittest.TestCase):
     self.da = DataAccessor('instance/test.sqlite3')
     self.da.initialise_db('db/schema.sql')
     self.da.initialise_db('db/categories.sql')
-    self.da.initialise_db('db/mappings.sql')
 
   def test_add_user(self):
     user = "testUser"
