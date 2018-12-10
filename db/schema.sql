@@ -1,0 +1,68 @@
+DROP TABLE IF EXISTS user;
+DROP TABLE IF EXISTS connection;
+DROP TABLE IF EXISTS institution;
+DROP TABLE IF EXISTS account;
+DROP TABLE IF EXISTS txn;
+DROP TABLE IF EXISTS category;
+DROP TABLE IF EXISTS mapping;
+DROP TABLE IF EXISTS budget;
+
+CREATE TABLE user (
+  userID INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT UNIQUE NOT NULL,
+  password TEXT NOT NULL,
+  email TEXT UNIQUE NOT NULL
+);
+
+CREATE TABLE connection (
+  connectionID INTEGER PRIMARY KEY AUTOINCREMENT,
+  userID INTEGER NOT NULL,
+  institutionID TEXT NOT NULL,
+  accessCode TEXT UNIQUE NOT NULL,
+  UNIQUE( userID, institutionID ) ON CONFLICT FAIL
+);
+
+CREATE TABLE institution (
+  institutionID TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL
+);
+
+CREATE TABLE account (
+  connectionID INTEGER NOT NULL,
+  accountID TEXT NOT NULL,
+  lastFourID INTEGER NOT NULL,
+  name TEXT NOT NULL,
+  officialName TEXT NULL,
+  accountType TEXT NOT NULL,
+  accountSubType TEXT NOT NULL
+);
+
+CREATE TABLE txn (
+  transactionID TEXT NOT NULL,
+  accountID TEXT NOT NULL,
+  category TEXT NOT NULL,
+  subCategory TEXT NULL,
+  name TEXT NOT NULL,
+  amount FLOAT NOT NULL,
+  date DATE NOT NULL,
+  categoryID INTEGER NULL,
+  UNIQUE(transactionID, accountID) ON CONFLICT FAIL
+);
+
+CREATE TABLE category (
+  categoryID INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT UNIQUE NOT NULL,
+  grp TEXT NULL
+);
+
+CREATE TABLE mapping (
+  pattern TEXT PRIMARY KEY NOT NULL,
+  categoryID INTEGER
+);
+
+CREATE TABLE budget (
+  userID INTEGER NOT NULL,
+  categoryID INTEGER NOT NULL,
+  budgetAmount FLOAT NOT NULL
+);
+

@@ -9,4 +9,5 @@ instance/
 .coverage
 htmlcov/
 
-build/
+data/
+scripts/
