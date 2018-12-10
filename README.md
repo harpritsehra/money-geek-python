@@ -1,12 +1,12 @@
-# money-geek
+Overview
+========
 Download bank transactions and summarise
-
-Instructions:
+### Instructions:
 1. Create virtual env to pull dependencies
-<TBA>
+_to be added_
 2. Setup PLAID credentials
-<TBA>
+_to be added_
 3. Initialise DB
-<TBA>
+_to be added_
 4. Start server
-<TBA>
+_to be added_
